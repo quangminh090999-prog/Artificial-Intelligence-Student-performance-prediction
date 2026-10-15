@@ -218,3 +218,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project data and generated artifacts
+data/raw/*.csv
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+models/*.joblib
+models/*.pkl
+reports/figures/*.png
+reports/results/*.csv
+
+# Local editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

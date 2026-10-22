@@ -1,0 +1,8 @@
+{
+  "best_model": "Ridge",
+  "test_MAE": 0.45237068433819466,
+  "test_rows": 1322,
+  "train_rows": 5285,
+  "best_ridge_alpha": 10,
+  "best_ridge_cv_MAE": 0.5070104864057163
+}

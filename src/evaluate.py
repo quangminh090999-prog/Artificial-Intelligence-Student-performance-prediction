@@ -14,6 +14,7 @@ from src.config import (
     TEST_SIZE,
 )
 from src.data_loader import load_data
+from src.data_cleaning import clean_student_data
 
 
 def evaluate_model():
@@ -22,7 +23,7 @@ def evaluate_model():
             "Chua co mo hinh. Hay chay python -m src.train truoc."
         )
 
-    data = load_data()
+    data, _ = clean_student_data(load_data())
     X = data.drop(columns=[TARGET_COLUMN])
     y = data[TARGET_COLUMN]
 

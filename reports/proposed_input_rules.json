@@ -1,0 +1,113 @@
+{
+  "numeric_ranges": {
+    "Hours_Studied": {
+      "min": 1.0,
+      "max": 44.0,
+      "recommended_min": 0.0,
+      "recommended_max": 44.0,
+      "unit": "giờ"
+    },
+    "Attendance": {
+      "min": 60.0,
+      "max": 100.0,
+      "recommended_min": 0.0,
+      "recommended_max": 100.0,
+      "unit": "%"
+    },
+    "Sleep_Hours": {
+      "min": 4.0,
+      "max": 10.0,
+      "recommended_min": 0.0,
+      "recommended_max": 10.0,
+      "unit": "giờ"
+    },
+    "Previous_Scores": {
+      "min": 50.0,
+      "max": 100.0,
+      "recommended_min": 0.0,
+      "recommended_max": 100.0,
+      "unit": "buổi/lần"
+    },
+    "Tutoring_Sessions": {
+      "min": 0.0,
+      "max": 8.0,
+      "recommended_min": 0.0,
+      "recommended_max": 8.0,
+      "unit": "buổi/lần"
+    },
+    "Physical_Activity": {
+      "min": 0.0,
+      "max": 6.0,
+      "recommended_min": 0.0,
+      "recommended_max": 6.0,
+      "unit": "buổi/lần"
+    }
+  },
+  "categorical_allowed": {
+    "Parental_Involvement": [
+      "High",
+      "Low",
+      "Medium"
+    ],
+    "Access_to_Resources": [
+      "High",
+      "Low",
+      "Medium"
+    ],
+    "Extracurricular_Activities": [
+      "No",
+      "Yes"
+    ],
+    "Motivation_Level": [
+      "High",
+      "Low",
+      "Medium"
+    ],
+    "Internet_Access": [
+      "No",
+      "Yes"
+    ],
+    "Family_Income": [
+      "High",
+      "Low",
+      "Medium"
+    ],
+    "Teacher_Quality": [
+      "High",
+      "Low",
+      "Medium"
+    ],
+    "School_Type": [
+      "Private",
+      "Public"
+    ],
+    "Peer_Influence": [
+      "Negative",
+      "Neutral",
+      "Positive"
+    ],
+    "Learning_Disabilities": [
+      "No",
+      "Yes"
+    ],
+    "Parental_Education_Level": [
+      "College",
+      "High School",
+      "Postgraduate"
+    ],
+    "Distance_from_Home": [
+      "Far",
+      "Moderate",
+      "Near"
+    ],
+    "Gender": [
+      "Female",
+      "Male"
+    ]
+  },
+  "target_anomaly_note": {
+    "column": "Exam_Score",
+    "anomaly_value": 101,
+    "recommendation": "Giới hạn về 100 (clip) hoặc loại bỏ bản ghi này vì thang điểm chuẩn là [0, 100]."
+  }
+}

@@ -6,6 +6,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = PROJECT_ROOT / "data" / "raw" / "StudentPerformanceFactors.csv"
 PROCESSED_DATA_PATH = PROJECT_ROOT / "data" / "processed"
+CLEAN_DATA_PATH = PROCESSED_DATA_PATH / "StudentPerformanceFactors_cleaned.csv"
 MODEL_PATH = PROJECT_ROOT / "models" / "student_score_pipeline.joblib"
 RESULTS_PATH = PROJECT_ROOT / "reports" / "results"
 FIGURES_PATH = PROJECT_ROOT / "reports" / "figures"

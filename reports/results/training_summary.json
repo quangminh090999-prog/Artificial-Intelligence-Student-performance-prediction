@@ -1,8 +1,15 @@
 {
   "best_model": "Ridge",
-  "test_MAE": 0.45237068433819466,
+  "test_MAE": 0.4522561987631521,
   "test_rows": 1322,
   "train_rows": 5285,
   "best_ridge_alpha": 10,
-  "best_ridge_cv_MAE": 0.5070104864057163
+  "best_ridge_cv_MAE": 0.5066410115799691,
+  "data_cleaning": {
+    "rows_before": 6607,
+    "rows_after": 6607,
+    "duplicates_removed": 0,
+    "target_values_clipped": 1,
+    "missing_feature_values_preserved": 235
+  }
 }

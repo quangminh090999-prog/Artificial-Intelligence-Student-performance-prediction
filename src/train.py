@@ -22,12 +22,13 @@ from src.config import (
     TEST_SIZE,
 )
 from src.data_loader import load_data
+from src.data_cleaning import clean_student_data
 from src.preprocessing import build_preprocessor
 
 
 def train_models():
     """Train regression models, compare metrics, and save the best pipeline."""
-    data = load_data()
+    data, cleaning_summary = clean_student_data(load_data())
 
     X = data.drop(columns=[TARGET_COLUMN])
     y = data[TARGET_COLUMN]
@@ -138,6 +139,7 @@ def train_models():
         "train_rows": len(X_train),
         "best_ridge_alpha": search.best_params_["model__alpha"],
         "best_ridge_cv_MAE": float(-search.best_score_),
+        "data_cleaning": cleaning_summary.to_dict(),
     }
     with open(RESULTS_PATH / "training_summary.json", "w", encoding="utf-8") as file:
         json.dump(summary, file, indent=2)

@@ -234,3 +234,6 @@ reports/results/*.csv
 .vscode/
 .DS_Store
 Thumbs.db
+
+*.pptx
+reports/*.pptx

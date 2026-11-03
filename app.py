@@ -86,6 +86,21 @@ def score_message(score: float) -> str:
     return "Kết quả dự đoán còn thấp và cần được theo dõi thêm."
 
 
+def boundary_label(
+    value: int,
+    minimum: int,
+    maximum: int,
+    lower_bucket: bool = True,
+    upper_bucket: bool = True,
+) -> str:
+    """Hiển thị giá trị biên dưới dạng ≤ hoặc ≥ nhưng vẫn trả số cho model."""
+    if lower_bucket and value == minimum:
+        return f"≤ {value}"
+    if upper_bucket and value == maximum:
+        return f"≥ {value}"
+    return str(value)
+
+
 def navigate(page: str) -> None:
     st.session_state.navigation = page
 
@@ -181,17 +196,36 @@ def render_home() -> None:
 
 def render_single_prediction() -> None:
     page_header("Dự đoán cho một sinh viên", "Điền đầy đủ 19 yếu tố. Các trường có dấu * là thông tin bắt buộc.")
+    st.caption("Các mốc ≤ và ≥ biểu thị giá trị nằm ngoài hoặc bằng biên dữ liệu huấn luyện; hệ thống dùng chính giá trị biên để dự đoán.")
     with st.form("student_prediction_form", clear_on_submit=False):
         st.subheader("1. Kết quả và thói quen học tập")
         left, right = st.columns(2, gap="large")
         with left:
-            hours_studied = st.slider("Số giờ học mỗi tuần *", 1, 44, 20)
-            attendance = st.slider("Tỷ lệ chuyên cần (%) *", 60, 100, 80)
-            previous_scores = st.slider("Điểm học tập trước đây *", 50, 100, 75)
+            hours_studied = st.select_slider(
+                "Số giờ học mỗi tuần *", options=list(range(1, 45)), value=20,
+                format_func=lambda value: boundary_label(value, 1, 44),
+            )
+            attendance = st.select_slider(
+                "Tỷ lệ chuyên cần (%) *", options=list(range(60, 101)), value=80,
+                format_func=lambda value: boundary_label(value, 60, 100, upper_bucket=False),
+            )
+            previous_scores = st.select_slider(
+                "Điểm học tập trước đây *", options=list(range(50, 101)), value=75,
+                format_func=lambda value: boundary_label(value, 50, 100, upper_bucket=False),
+            )
         with right:
-            sleep_hours = st.slider("Số giờ ngủ mỗi ngày *", 4, 10, 7)
-            tutoring_sessions = st.slider("Số buổi phụ đạo *", 0, 8, 1)
-            physical_activity = st.slider("Số giờ hoạt động thể chất mỗi tuần *", 0, 6, 3)
+            sleep_hours = st.select_slider(
+                "Số giờ ngủ mỗi ngày *", options=list(range(4, 11)), value=7,
+                format_func=lambda value: boundary_label(value, 4, 10),
+            )
+            tutoring_sessions = st.select_slider(
+                "Số buổi phụ đạo *", options=list(range(0, 9)), value=1,
+                format_func=lambda value: boundary_label(value, 0, 8, lower_bucket=False),
+            )
+            physical_activity = st.select_slider(
+                "Số giờ hoạt động thể chất mỗi tuần *", options=list(range(0, 7)), value=3,
+                format_func=lambda value: boundary_label(value, 0, 6, lower_bucket=False),
+            )
         st.subheader("2. Động lực và môi trường học tập")
         left, right = st.columns(2, gap="large")
         with left:

@@ -264,7 +264,8 @@ def render_single_prediction() -> None:
     }
     try:
         if model is not None:
-            predicted_score, caption = predict_one(model, input_data), "Kết quả từ SVR Tuned"
+            predicted_score = predict_one(model, input_data)
+            caption = f"Kết quả từ {selected_model_name}"
         else:
             predicted_score, caption = estimate_demo_score(input_data), "Kết quả minh họa – chưa phải dự đoán AI"
         st.subheader("Kết quả phân tích")

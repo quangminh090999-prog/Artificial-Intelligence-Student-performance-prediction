@@ -57,6 +57,7 @@ khỏi Git để repository nhẹ và tránh đăng dữ liệu khi chưa xác n
 ```powershell
 python -m src.data_loader
 python -m src.train
+python -m src.train_decision_tree
 python -m src.evaluate
 python -m src.feature_selection
 python -m src.knn_model
@@ -66,9 +67,17 @@ pytest
 ```
 
 Sau khi chạy `python -m src.train`, ứng dụng dùng pipeline tốt nhất của nhóm tại
-`models/student_score_pipeline.joblib`. Lệnh `python -m src.train_svr` tạo mô
-hình SVR đã tuning tại `models/svr_pipeline.joblib`; có thể chọn mô hình này ở
-thanh bên của ứng dụng.
+`models/student_score_pipeline.joblib`. Lệnh `python -m src.train_decision_tree` huấn
+luyện và tuning Decision Tree (GridSearchCV 5-fold), lưu kết quả vào
+`reports/results/decision_tree_metrics.csv` và `decision_tree_cv_results.csv`. Lệnh
+`python -m src.train_svr` tạo mô hình SVR đã tuning tại `models/svr_pipeline.joblib`;
+có thể chọn mô hình này ở thanh bên của ứng dụng.
+
+Để chạy toàn bộ pipeline từ đầu đến cuối (load → clean → train tất cả mô hình → tổng hợp kết quả):
+
+```powershell
+python -m src.main
+```
 
 Để tạo bảng và biểu đồ permutation importance cho SVR đã tuning:
 

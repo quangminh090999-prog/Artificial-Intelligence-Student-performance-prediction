@@ -1,12 +1,19 @@
 """Giao diện Streamlit dự đoán kết quả học tập của sinh viên."""
 
+import json
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import streamlit as st
 
-from src.config import MODEL_PATH
-from src.predict import load_model, predict_one
+from src.config import MODEL_PATH, RESULTS_PATH, SVR_MODEL_PATH
+from src.predict import (
+    InputValidationError,
+    load_model,
+    predict_batch_with_errors,
+    predict_one,
+)
 
 
 st.set_page_config(
@@ -129,11 +136,29 @@ def score_message(score: float) -> str:
     return "Kết quả dự đoán còn thấp và cần được theo dõi thêm."
 
 
+available_models = {}
+if MODEL_PATH.exists():
+    available_models["Mô hình chính thức của nhóm"] = MODEL_PATH
+if SVR_MODEL_PATH.exists():
+    available_models["SVR đã tuning của Người 5"] = SVR_MODEL_PATH
+if not available_models:
+    available_models["Mô hình chính thức của nhóm"] = MODEL_PATH
+
+with st.sidebar:
+    selected_model_name = st.selectbox(
+        "Mô hình sử dụng",
+        options=list(available_models),
+    )
+selected_model_path = available_models[selected_model_name]
+
 model = None
 model_error = None
-if MODEL_PATH.exists():
+if selected_model_path.exists():
     try:
-        model = get_model(str(MODEL_PATH), MODEL_PATH.stat().st_mtime)
+        model = get_model(
+            str(selected_model_path),
+            selected_model_path.stat().st_mtime,
+        )
     except Exception as exc:  # Hiển thị lỗi thân thiện thay vì làm hỏng toàn bộ app.
         model_error = str(exc)
 
@@ -141,7 +166,7 @@ with st.sidebar:
     st.header("Thông tin hệ thống")
     if model is not None:
         st.success("Mô hình đã sẵn sàng")
-        st.caption(f"Nguồn: `{MODEL_PATH.name}`")
+        st.caption(f"Nguồn: `{selected_model_path.name}`")
     elif model_error:
         st.error("Không thể nạp mô hình")
         st.caption(model_error)
@@ -149,7 +174,7 @@ with st.sidebar:
         st.warning("Đang dùng chế độ minh họa")
         st.caption(
             "Chưa có file mô hình. Giao diện sẽ tự nhận mô hình khi file "
-            f"`{MODEL_PATH.name}` được đặt trong thư mục `models`."
+            f"`{selected_model_path.name}` được đặt trong thư mục `models`."
         )
 
     st.divider()
@@ -315,3 +340,113 @@ if submitted:
     except Exception as exc:
         st.error("Không thể thực hiện dự đoán. Hãy kiểm tra lại file mô hình.")
         st.caption(str(exc))
+
+
+st.divider()
+st.header("Dự đoán hàng loạt từ CSV")
+st.write(
+    "Tải lên tệp CSV chứa 19 cột đầu vào. Hệ thống giữ lại mọi dòng, "
+    "dự đoán các dòng hợp lệ và ghi lỗi cụ thể cho từng dòng không hợp lệ."
+)
+
+uploaded_file = st.file_uploader(
+    "Chọn tệp CSV",
+    type=["csv"],
+    help="Tên cột phải giống dữ liệu huấn luyện của dự án.",
+)
+
+if uploaded_file is not None:
+    try:
+        batch_data = pd.read_csv(uploaded_file)
+        st.subheader("Xem trước dữ liệu")
+        st.caption(f"{len(batch_data)} dòng, {len(batch_data.columns)} cột")
+        st.dataframe(batch_data.head(20), use_container_width=True)
+
+        if model is None:
+            st.warning(
+                "Cần mô hình đã huấn luyện để dự đoán CSV. "
+                "Hãy chạy `python -m src.train` trước."
+            )
+        elif st.button(
+            "Kiểm tra và dự đoán CSV",
+            type="primary",
+            use_container_width=True,
+        ):
+            batch_result = predict_batch_with_errors(model, batch_data)
+            valid_count = int(batch_result["Validation_Error"].eq("").sum())
+            error_count = len(batch_result) - valid_count
+
+            metric_left, metric_right = st.columns(2)
+            metric_left.metric("Dòng dự đoán thành công", valid_count)
+            metric_right.metric("Dòng có lỗi", error_count)
+            if error_count:
+                st.warning(
+                    "Các dòng lỗi được giữ nguyên và có mô tả trong cột "
+                    "Validation_Error."
+                )
+            else:
+                st.success("Toàn bộ dữ liệu hợp lệ.")
+
+            st.dataframe(batch_result, use_container_width=True)
+            st.download_button(
+                "Tải kết quả CSV",
+                data=batch_result.to_csv(index=False).encode("utf-8-sig"),
+                file_name="student_score_predictions.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+    except InputValidationError as exc:
+        st.error(str(exc))
+        if not exc.errors.empty:
+            st.dataframe(exc.errors, use_container_width=True)
+    except (pd.errors.ParserError, UnicodeDecodeError) as exc:
+        st.error("Không thể đọc tệp CSV. Hãy kiểm tra định dạng và bảng mã.")
+        st.caption(str(exc))
+    except Exception as exc:
+        st.error("Không thể xử lý tệp CSV.")
+        st.caption(str(exc))
+
+
+st.divider()
+st.header("Đánh giá mô hình")
+comparison_path = RESULTS_PATH / "model_comparison.csv"
+metrics_path = RESULTS_PATH / "evaluation_metrics.json"
+svr_metrics_path = RESULTS_PATH / "svr_metrics.csv"
+
+if metrics_path.exists():
+    try:
+        metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
+        metric_columns = st.columns(3)
+        metric_columns[0].metric("MAE", f"{metrics['MAE']:.4f}")
+        metric_columns[1].metric("RMSE", f"{metrics['RMSE']:.4f}")
+        metric_columns[2].metric("R²", f"{metrics['R2']:.4f}")
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        st.warning("Tệp chỉ số đánh giá không đúng định dạng.")
+        st.caption(str(exc))
+else:
+    st.info("Chưa có chỉ số đánh giá. Hãy chạy `python -m src.evaluate`.")
+
+if comparison_path.exists():
+    try:
+        comparison = pd.read_csv(comparison_path)
+        st.subheader("So sánh các mô hình")
+        st.dataframe(comparison, use_container_width=True, hide_index=True)
+    except (pd.errors.ParserError, UnicodeDecodeError) as exc:
+        st.warning("Không thể đọc bảng so sánh mô hình.")
+        st.caption(str(exc))
+else:
+    st.info("Chưa có bảng so sánh. Hãy chạy `python -m src.train`.")
+
+if svr_metrics_path.exists():
+    try:
+        svr_metrics = pd.read_csv(svr_metrics_path)
+        st.subheader("Kết quả SVR sau tuning")
+        st.dataframe(svr_metrics, use_container_width=True, hide_index=True)
+    except (pd.errors.ParserError, UnicodeDecodeError) as exc:
+        st.warning("Không thể đọc kết quả SVR tuning.")
+        st.caption(str(exc))
+
+st.caption(
+    "Permutation importance và các chỉ số chỉ phản ánh khả năng dự đoán "
+    "trên tập dữ liệu hiện tại, không chứng minh quan hệ nhân quả."
+)

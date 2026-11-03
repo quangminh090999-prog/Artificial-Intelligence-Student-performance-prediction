@@ -30,7 +30,10 @@ thời gian học, chuyên cần, điểm trước đây, số buổi phụ đ�
 |   |-- data_loader.py        # Đọc và kiểm tra dữ liệu
 |   |-- preprocessing.py      # Tiền xử lý dữ liệu
 |   |-- train.py              # Huấn luyện các mô hình
+|   |-- train_svr.py          # Tuning SVR riêng của Người 5
 |   |-- evaluate.py           # Đánh giá và so sánh
+|   |-- input_schema.py       # Kiểm tra 19 trường và lỗi theo dòng
+|   |-- explain_model.py      # Permutation importance
 |   `-- predict.py            # Nạp mô hình và dự đoán
 `-- tests/                    # Kiểm thử tự động
 ```
@@ -53,12 +56,36 @@ khỏi Git để repository nhẹ và tránh đăng dữ liệu khi chưa xác n
 
 ```powershell
 python -m src.data_loader
+python -m src.train
+python -m src.evaluate
+python -m src.feature_selection
+python -m src.knn_model
+python -m src.train_svr
 streamlit run app.py
 pytest
 ```
 
-Các lệnh huấn luyện và đánh giá sẽ được bổ sung khi từng thành viên hoàn thành
-module được giao.
+Sau khi chạy `python -m src.train`, ứng dụng dùng pipeline tốt nhất của nhóm tại
+`models/student_score_pipeline.joblib`. Lệnh `python -m src.train_svr` tạo mô
+hình SVR đã tuning tại `models/svr_pipeline.joblib`; có thể chọn mô hình này ở
+thanh bên của ứng dụng.
+
+Để tạo bảng và biểu đồ permutation importance cho SVR đã tuning:
+
+```powershell
+python -c "from src.config import SVR_MODEL_PATH; from src.explain_model import explain_model; explain_model(SVR_MODEL_PATH, output_stem='svr_permutation_importance')"
+```
+
+## Dự đoán CSV trên Streamlit
+
+Tệp CSV phải có đủ 19 cột đầu vào với tên giống dữ liệu huấn luyện. Ứng dụng:
+
+- kiểm tra cột thiếu, kiểu số, miền giá trị và danh mục;
+- dự đoán những dòng hợp lệ;
+- giữ lại dòng lỗi kèm cột `Validation_Error`;
+- cho phép tải kết quả dưới dạng CSV.
+
+Có thể thử ngay bằng tệp mẫu `data/sample_batch_input.csv`.
 
 ## Phân công 5 thành viên
 

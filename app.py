@@ -124,7 +124,7 @@ available_models: dict[str, Path] = {}
 if SVR_MODEL_PATH.exists():
     available_models["SVR Tuned – mô hình triển khai"] = SVR_MODEL_PATH
 if MODEL_PATH.exists():
-    available_models["Mô hình đối chứng của nhóm"] = MODEL_PATH
+    available_models["Ridge Regression – mô hình đối chứng"] = MODEL_PATH
 if not available_models:
     available_models["SVR Tuned – mô hình triển khai"] = SVR_MODEL_PATH
 

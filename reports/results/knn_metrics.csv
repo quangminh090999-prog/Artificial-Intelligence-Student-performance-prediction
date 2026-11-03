@@ -1,0 +1,3 @@
+model,cv_mae,test_mae,test_rmse,test_r2,best_params
+KNN_full_features,1.4536164444431077,1.3806093277459366,2.3464360637724266,0.610489283881147,"{""model__n_neighbors"": 15, ""model__p"": 2, ""model__weights"": ""distance""}"
+KNN_selected_features,1.2914610041567862,1.2833406623904018,2.2821468722639775,0.6315410227636187,"{""model__n_neighbors"": 15, ""model__p"": 2, ""model__weights"": ""distance"", ""selector__k"": 20}"

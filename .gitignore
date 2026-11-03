@@ -232,6 +232,9 @@ reports/results/*.csv
 !reports/results/svr_cv_results.csv
 !reports/results/svr_metrics.csv
 !reports/results/svr_permutation_importance.csv
+!reports/results/decision_tree_cv_results.csv
+!reports/results/decision_tree_metrics.csv
+!reports/results/all_models_summary.csv
 
 # Local editor and OS files
 .idea/

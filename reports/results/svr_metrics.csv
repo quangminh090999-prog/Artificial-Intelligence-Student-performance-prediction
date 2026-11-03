@@ -1,0 +1,2 @@
+model,cv_mae,test_mae,test_rmse,test_r2,fit_seconds,train_rows,test_rows,best_params
+SVR_Tuned,0.45402391783852514,0.4063461486756852,1.800302238309061,0.7707059404584754,148.53053880000152,5285,1322,"{""model__C"": 10.0, ""model__epsilon"": 0.2, ""model__kernel"": ""linear""}"

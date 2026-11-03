@@ -36,3 +36,5 @@ def test_proposed_input_rules():
     assert len(rules["numeric_ranges"]) == 6
     assert len(rules["categorical_allowed"]) == 13
     assert rules["target_anomaly_note"]["anomaly_value"] == 101
+    assert rules["numeric_ranges"]["Previous_Scores"]["unit"] == "điểm"
+    assert rules["numeric_ranges"]["Physical_Activity"]["unit"] == "giờ/tuần"

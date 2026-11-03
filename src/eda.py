@@ -347,6 +347,15 @@ def plot_categorical_comparisons(df: pd.DataFrame, output_dir: Path = FIGURES_DI
 
 def get_proposed_input_rules(df: pd.DataFrame) -> Dict[str, Any]:
     """Đề xuất miền giá trị hợp lệ cho Người 1 (data validation) và Người 5 (Streamlit schema)."""
+    numeric_units = {
+        "Hours_Studied": "giờ/tuần",
+        "Attendance": "%",
+        "Sleep_Hours": "giờ/ngày",
+        "Previous_Scores": "điểm",
+        "Tutoring_Sessions": "buổi",
+        "Physical_Activity": "giờ/tuần",
+    }
+
     rules = {
         "numeric_ranges": {},
         "categorical_allowed": {},
@@ -366,7 +375,7 @@ def get_proposed_input_rules(df: pd.DataFrame) -> Dict[str, Any]:
             "max": float(series.max()),
             "recommended_min": 0.0,
             "recommended_max": float(series.max()),
-            "unit": "giờ" if "Hours" in col else ("%" if col == "Attendance" else "buổi/lần"),
+            "unit": numeric_units.get(col, "không xác định"),
         }
 
     for col in df.select_dtypes(exclude=[np.number]).columns:

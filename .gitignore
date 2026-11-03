@@ -226,6 +226,7 @@ data/processed/*
 !data/processed/.gitkeep
 models/*.joblib
 models/*.pkl
+!models/svr_pipeline.joblib
 reports/figures/*.png
 reports/results/*.csv
 !reports/figures/08_svr_permutation_importance.png

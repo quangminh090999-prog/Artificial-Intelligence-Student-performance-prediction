@@ -137,12 +137,13 @@ def score_message(score: float) -> str:
 
 
 available_models = {}
-if MODEL_PATH.exists():
-    available_models["Mô hình chính thức của nhóm"] = MODEL_PATH
 if SVR_MODEL_PATH.exists():
-    available_models["SVR đã tuning của Người 5"] = SVR_MODEL_PATH
+    # SVR Tuned đang đứng đầu bảng so sánh chung nên là lựa chọn mặc định.
+    available_models["SVR Tuned - mô hình triển khai"] = SVR_MODEL_PATH
+if MODEL_PATH.exists():
+    available_models["Mô hình đối chứng của nhóm"] = MODEL_PATH
 if not available_models:
-    available_models["Mô hình chính thức của nhóm"] = MODEL_PATH
+    available_models["SVR Tuned - mô hình triển khai"] = SVR_MODEL_PATH
 
 with st.sidebar:
     selected_model_name = st.selectbox(

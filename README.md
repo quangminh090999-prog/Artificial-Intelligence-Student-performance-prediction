@@ -30,6 +30,7 @@ thời gian học, chuyên cần, điểm trước đây, số buổi phụ đ�
 |   |-- data_loader.py        # Đọc và kiểm tra dữ liệu
 |   |-- preprocessing.py      # Tiền xử lý dữ liệu
 |   |-- train.py              # Huấn luyện các mô hình
+|   |-- train_advanced.py     # Tuning RF/GB và đánh giá chung (Người 4)
 |   |-- train_svr.py          # Tuning SVR riêng của Người 5
 |   |-- evaluate.py           # Đánh giá và so sánh
 |   |-- input_schema.py       # Kiểm tra 19 trường và lỗi theo dòng
@@ -62,6 +63,7 @@ python -m src.evaluate
 python -m src.feature_selection
 python -m src.knn_model
 python -m src.train_svr
+python -m src.train_advanced
 streamlit run app.py
 pytest
 ```
@@ -78,6 +80,11 @@ báo cáo MAE, RMSE và R2 trên tập test. Kết quả tuning Ridge được l
 `reports/results/ridge_cv_results.csv`; bảng hệ số và biểu đồ giải thích nằm tại
 `reports/results/ridge_coefficients.csv` và
 `reports/figures/09_ridge_coefficients.png`.
+
+Lệnh `python -m src.train_advanced` tuning Random Forest và Gradient Boosting
+bằng 5-fold CV, đo độ lệch train-test và thời gian chạy, tạo biểu đồ chẩn đoán,
+sau đó lưu bảng lựa chọn mô hình cuối tại
+`reports/results/final_model_selection.csv`.
 
 Để chạy toàn bộ pipeline từ đầu đến cuối (load → clean → train tất cả mô hình → tổng hợp kết quả):
 

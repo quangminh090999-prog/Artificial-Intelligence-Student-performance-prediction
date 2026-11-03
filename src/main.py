@@ -15,10 +15,15 @@ from src.data_loader import load_data
 from src.evaluate import evaluate_model
 from src.train import train_models
 from src.train_decision_tree import train_decision_tree
+from src.train_advanced import train_advanced_models
 from src.train_svr import train_svr
 
 
-def run_pipeline(include_svr: bool = True, include_dt: bool = True) -> None:
+def run_pipeline(
+    include_svr: bool = True,
+    include_dt: bool = True,
+    include_advanced: bool = True,
+) -> None:
     """Chạy toàn bộ pipeline từ đầu đến cuối và in tóm tắt kết quả.
 
     Parameters
@@ -27,6 +32,8 @@ def run_pipeline(include_svr: bool = True, include_dt: bool = True) -> None:
         Có chạy tuning SVR không (mất vài phút).
     include_dt:
         Có chạy tuning Decision Tree không.
+    include_advanced:
+        Có tuning Random Forest, Gradient Boosting và đánh giá chung không.
     """
     print("=" * 60)
     print("BƯỚC 1 — Đọc và làm sạch dữ liệu")
@@ -67,9 +74,16 @@ def run_pipeline(include_svr: bool = True, include_dt: bool = True) -> None:
         print("=" * 60)
         train_svr()
 
+    if include_advanced:
+        print()
+        print("=" * 60)
+        print("BƯỚC 6 — Tuning mô hình nâng cao và phân tích overfitting")
+        print("=" * 60)
+        train_advanced_models()
+
     print()
     print("=" * 60)
-    print("BƯỚC 6 — Tổng hợp kết quả")
+    print("BƯỚC 7 — Tổng hợp kết quả")
     print("=" * 60)
     _merge_and_print_summary(include_dt=include_dt, include_svr=include_svr)
 

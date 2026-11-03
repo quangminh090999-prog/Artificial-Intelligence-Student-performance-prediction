@@ -238,6 +238,14 @@ reports/results/*.csv
 !reports/results/ridge_cv_results.csv
 !reports/results/ridge_coefficients.csv
 !reports/figures/09_ridge_coefficients.png
+!reports/figures/10_advanced_predicted_vs_actual.png
+!reports/figures/11_advanced_residual_distribution.png
+!reports/figures/12_advanced_overfitting_gap.png
+!reports/figures/13_all_models_comparison.png
+!reports/results/advanced_model_cv_results.csv
+!reports/results/advanced_model_metrics.csv
+!reports/results/advanced_overfitting_analysis.csv
+!reports/results/final_model_selection.csv
 
 # Local editor and OS files
 .idea/

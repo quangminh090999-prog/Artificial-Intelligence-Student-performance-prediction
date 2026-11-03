@@ -228,9 +228,16 @@ models/*.joblib
 models/*.pkl
 reports/figures/*.png
 reports/results/*.csv
+!reports/figures/08_svr_permutation_importance.png
+!reports/results/svr_cv_results.csv
+!reports/results/svr_metrics.csv
+!reports/results/svr_permutation_importance.csv
 
 # Local editor and OS files
 .idea/
 .vscode/
 .DS_Store
 Thumbs.db
+
+*.pptx
+reports/*.pptx

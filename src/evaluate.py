@@ -7,12 +7,20 @@ from sklearn.model_selection import train_test_split
 
 from src.config import (
     MODEL_PATH,
+<<<<<<< HEAD
+=======
+    PROJECT_ROOT,
+>>>>>>> origin/main
     RANDOM_STATE,
     RESULTS_PATH,
     TARGET_COLUMN,
     TEST_SIZE,
 )
 from src.data_loader import load_data
+<<<<<<< HEAD
+=======
+from src.data_cleaning import clean_student_data
+>>>>>>> origin/main
 
 
 def evaluate_model():
@@ -21,7 +29,11 @@ def evaluate_model():
             "Chua co mo hinh. Hay chay python -m src.train truoc."
         )
 
+<<<<<<< HEAD
     data = load_data()
+=======
+    data, _ = clean_student_data(load_data())
+>>>>>>> origin/main
     X = data.drop(columns=[TARGET_COLUMN])
     y = data[TARGET_COLUMN]
 
@@ -49,8 +61,16 @@ def evaluate_model():
     for name, value in metrics.items():
         print(f"{name}: {value}")
 
+<<<<<<< HEAD
     print(f"Saved to: {output_file}")
 
 
 if __name__ == "__main__":
     evaluate_model()
+=======
+    print(f"Saved to: {output_file.relative_to(PROJECT_ROOT)}")
+
+
+if __name__ == "__main__":
+    evaluate_model()
+>>>>>>> origin/main

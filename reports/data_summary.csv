@@ -1,0 +1,21 @@
+﻿Thuộc_tính,Kiểu_dữ_liệu,Số_lượng_thiếu,Tỷ_lệ_thiếu_%,Số_giá_trị_duy_nhất,Miền_giá_trị_hoặc_Nhóm,Min,Max,Mean,Median,Std
+Hours_Studied,int64,0,0.0,41,"[1.0, 44.0]",1.0,44.0,19.98,20.0,5.99
+Attendance,int64,0,0.0,41,"[60.0, 100.0]",60.0,100.0,79.98,80.0,11.55
+Parental_Involvement,str,0,0.0,3,"Low, Medium, High",,,,,
+Access_to_Resources,str,0,0.0,3,"High, Medium, Low",,,,,
+Extracurricular_Activities,str,0,0.0,2,"No, Yes",,,,,
+Sleep_Hours,int64,0,0.0,7,"[4.0, 10.0]",4.0,10.0,7.03,7.0,1.47
+Previous_Scores,int64,0,0.0,51,"[50.0, 100.0]",50.0,100.0,75.07,75.0,14.4
+Motivation_Level,str,0,0.0,3,"Low, Medium, High",,,,,
+Internet_Access,str,0,0.0,2,"Yes, No",,,,,
+Tutoring_Sessions,int64,0,0.0,9,"[0.0, 8.0]",0.0,8.0,1.49,1.0,1.23
+Family_Income,str,0,0.0,3,"Low, Medium, High",,,,,
+Teacher_Quality,str,78,1.18,3,"Medium, High, Low",,,,,
+School_Type,str,0,0.0,2,"Public, Private",,,,,
+Peer_Influence,str,0,0.0,3,"Positive, Negative, Neutral",,,,,
+Physical_Activity,int64,0,0.0,7,"[0.0, 6.0]",0.0,6.0,2.97,3.0,1.03
+Learning_Disabilities,str,0,0.0,2,"No, Yes",,,,,
+Parental_Education_Level,str,90,1.36,3,"High School, College, Postgraduate",,,,,
+Distance_from_Home,str,67,1.01,3,"Near, Moderate, Far",,,,,
+Gender,str,0,0.0,2,"Male, Female",,,,,
+Exam_Score,int64,0,0.0,45,"[55.0, 101.0]",55.0,101.0,67.24,67.0,3.89

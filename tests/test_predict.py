@@ -1,8 +1,28 @@
-"""Kiểm thử chuẩn dữ liệu đầu vào cho giao diện dự đoán."""
 
+"""Kiểm thử chuẩn dữ liệu đầu vào và hàm dự đoán."""
+
+import joblib
+import numpy as np
+import pandas as pd
 import pytest
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVR
 
-from src.predict import INPUT_COLUMNS, prepare_input
+from src.predict import (
+    INPUT_COLUMNS,
+    load_model,
+    predict_batch,
+    predict_batch_with_errors,
+    prepare_input,
+)
+from src.preprocessing import build_preprocessor
+
+
+class ConstantModel:
+    """Mô hình đơn giản dùng để kiểm thử."""
+
+    def predict(self, frame):
+        return np.full(len(frame), 75.5)
 
 
 def sample_input() -> dict[str, object]:
@@ -42,3 +62,53 @@ def test_prepare_input_rejects_missing_column() -> None:
 
     with pytest.raises(ValueError, match="Attendance"):
         prepare_input(values)
+
+
+def test_predict_batch_returns_prediction_for_every_row() -> None:
+    frame = pd.DataFrame([sample_input(), sample_input()])
+
+    result = predict_batch(ConstantModel(), frame)
+
+    assert result["Predicted_Exam_Score"].tolist() == [75.5, 75.5]
+
+
+def test_predict_batch_with_errors_only_predicts_valid_rows() -> None:
+    invalid = sample_input()
+    invalid["Gender"] = "Unknown"
+    frame = pd.DataFrame([sample_input(), invalid])
+
+    result = predict_batch_with_errors(ConstantModel(), frame)
+
+    assert result.loc[0, "Predicted_Exam_Score"] == 75.5
+    assert pd.isna(result.loc[1, "Predicted_Exam_Score"])
+    assert "Gender" in result.loc[1, "Validation_Error"]
+
+
+def test_saved_real_pipeline_supports_batch_prediction(tmp_path) -> None:
+    rows = []
+
+    for hours, attendance in [(10, 65), (20, 75), (30, 85), (40, 95)]:
+        row = sample_input()
+        row["Hours_Studied"] = hours
+        row["Attendance"] = attendance
+        rows.append(row)
+
+    frame = pd.DataFrame(rows)
+    target = [60.0, 68.0, 76.0, 84.0]
+
+    pipeline = Pipeline(
+        [
+            ("preprocessor", build_preprocessor()),
+            ("model", SVR(kernel="linear", C=1.0)),
+        ]
+    )
+    pipeline.fit(frame, target)
+
+    path = tmp_path / "pipeline.joblib"
+    joblib.dump(pipeline, path)
+
+    restored = load_model(path)
+    result = predict_batch(restored, frame)
+
+    assert len(result) == len(frame)
+    assert np.isfinite(result["Predicted_Exam_Score"]).all()

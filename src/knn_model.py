@@ -4,7 +4,7 @@
 import json
 
 import pandas as pd
-from sklearn.feature_selection import SelectKBest, mutual_info_regression
+from sklearn.feature_selection import SelectKBest
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.neighbors import KNeighborsRegressor
@@ -19,6 +19,7 @@ from src.config import (
     CV_FOLDS,
 )
 from src.data_loader import load_data
+from src.feature_selection import mutual_info_with_random_state
 from src.preprocessing import build_preprocessor
 
 
@@ -65,7 +66,7 @@ def run_knn():
         ("preprocessor", build_preprocessor()),
         (
             "selector",
-            SelectKBest(score_func=mutual_info_regression),
+            SelectKBest(score_func=mutual_info_with_random_state),
         ),
         ("model", KNeighborsRegressor()),
     ])
@@ -116,6 +117,15 @@ def run_knn():
         })
 
         table = pd.DataFrame(search.cv_results_)
+        # Thời gian chạy phụ thuộc máy và thay đổi ở mỗi lần thực thi.
+        # Không lưu các cột này để báo cáo CV có thể tái lập và diff Git gọn.
+        timing_columns = [
+            "mean_fit_time",
+            "std_fit_time",
+            "mean_score_time",
+            "std_score_time",
+        ]
+        table = table.drop(columns=timing_columns, errors="ignore")
         table.insert(0, "model", name)
         cv_tables.append(table)
 

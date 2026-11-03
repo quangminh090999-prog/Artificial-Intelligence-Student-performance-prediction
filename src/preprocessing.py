@@ -1,10 +1,10 @@
+
 """Pipeline tiền xử lý dữ liệu cho mô hình dự đoán điểm."""
 
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
-
 
 NUMERIC_FEATURES = [
     "Hours_Studied",

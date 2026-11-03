@@ -1,9 +1,10 @@
-"""Kiểm thử chuẩn dữ liệu và hàm dự đoán cho giao diện."""
 
+"""Kiểm thử chuẩn dữ liệu đầu vào và hàm dự đoán."""
+
+import joblib
 import numpy as np
 import pandas as pd
 import pytest
-import joblib
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVR
 
@@ -18,7 +19,7 @@ from src.preprocessing import build_preprocessor
 
 
 class ConstantModel:
-    """Mô hình nhỏ dùng để kiểm thử giao diện suy luận."""
+    """Mô hình đơn giản dùng để kiểm thử."""
 
     def predict(self, frame):
         return np.full(len(frame), 75.5)
@@ -85,13 +86,16 @@ def test_predict_batch_with_errors_only_predicts_valid_rows() -> None:
 
 def test_saved_real_pipeline_supports_batch_prediction(tmp_path) -> None:
     rows = []
+
     for hours, attendance in [(10, 65), (20, 75), (30, 85), (40, 95)]:
         row = sample_input()
         row["Hours_Studied"] = hours
         row["Attendance"] = attendance
         rows.append(row)
+
     frame = pd.DataFrame(rows)
     target = [60.0, 68.0, 76.0, 84.0]
+
     pipeline = Pipeline(
         [
             ("preprocessor", build_preprocessor()),
@@ -99,6 +103,7 @@ def test_saved_real_pipeline_supports_batch_prediction(tmp_path) -> None:
         ]
     )
     pipeline.fit(frame, target)
+
     path = tmp_path / "pipeline.joblib"
     joblib.dump(pipeline, path)
 

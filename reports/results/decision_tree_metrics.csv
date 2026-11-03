@@ -1,0 +1,2 @@
+model,CV_MAE,MAE,RMSE,R2,train_rows,test_rows,max_depth,min_samples_leaf,min_samples_split
+DecisionTree_Tuned,1.663664244795844,1.5397161504167158,2.652456316218991,0.5022647020125922,5285,1322,10,4,10

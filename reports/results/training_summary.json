@@ -1,8 +1,11 @@
 {
-  "best_model": "Ridge",
-  "test_MAE": 0.4523706843381943,
-  "test_rows": 1322,
+  "best_model": "Ridge_Tuned",
+  "best_cv_MAE": 0.5070104864057161,
+  "test_MAE": 0.4523708838467277,
+  "test_RMSE": 1.8041406726777085,
+  "test_R2": 0.769727139849159,
   "train_rows": 5285,
-  "best_ridge_alpha": 10,
+  "test_rows": 1322,
+  "best_ridge_alpha": 10.0,
   "best_ridge_cv_MAE": 0.5070104864057161
 }

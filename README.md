@@ -73,6 +73,12 @@ luyện và tuning Decision Tree (GridSearchCV 5-fold), lưu kết quả vào
 `python -m src.train_svr` tạo mô hình SVR đã tuning tại `models/svr_pipeline.joblib`;
 có thể chọn mô hình này ở thanh bên của ứng dụng.
 
+Quy trình `python -m src.train` chọn model bằng CV MAE trên tập train, sau đó mới
+báo cáo MAE, RMSE và R2 trên tập test. Kết quả tuning Ridge được lưu tại
+`reports/results/ridge_cv_results.csv`; bảng hệ số và biểu đồ giải thích nằm tại
+`reports/results/ridge_coefficients.csv` và
+`reports/figures/09_ridge_coefficients.png`.
+
 Để chạy toàn bộ pipeline từ đầu đến cuối (load → clean → train tất cả mô hình → tổng hợp kết quả):
 
 ```powershell

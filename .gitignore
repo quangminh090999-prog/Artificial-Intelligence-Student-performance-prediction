@@ -235,6 +235,9 @@ reports/results/*.csv
 !reports/results/decision_tree_cv_results.csv
 !reports/results/decision_tree_metrics.csv
 !reports/results/all_models_summary.csv
+!reports/results/ridge_cv_results.csv
+!reports/results/ridge_coefficients.csv
+!reports/figures/09_ridge_coefficients.png
 
 # Local editor and OS files
 .idea/

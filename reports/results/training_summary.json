@@ -1,13 +1,13 @@
 {
   "best_model": "Ridge_Tuned",
-  "best_cv_MAE": 0.5070104864057161,
-  "test_MAE": 0.4523708838467277,
-  "test_RMSE": 1.8041406726777085,
-  "test_R2": 0.769727139849159,
+  "best_cv_MAE": 0.5066410115799691,
+  "test_MAE": 0.45225890793049406,
+  "test_RMSE": 1.804122552725291,
+  "test_R2": 0.7697317653336111,
   "train_rows": 5285,
   "test_rows": 1322,
   "best_ridge_alpha": 10.0,
-  "best_ridge_cv_MAE": 0.5070104864057161,
+  "best_ridge_cv_MAE": 0.5066410115799691,
   "data_cleaning": {
     "rows_before": 6607,
     "rows_after": 6607,

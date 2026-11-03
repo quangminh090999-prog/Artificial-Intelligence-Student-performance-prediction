@@ -1,78 +1,132 @@
-
-<<<<<<< HEAD
-"""Train, tune, compare, and save regression models."""
-=======
-"""Train and compare regression models for student exam score prediction."""
->>>>>>> origin/main
+"""Huấn luyện, tuning, so sánh và lưu các mô hình hồi quy."""
 
 import json
 
 import joblib
-import pandas as pd
-<<<<<<< HEAD
+import matplotlib
 
+matplotlib.use("Agg")
+
+import matplotlib.pyplot as plt
+import pandas as pd
 from sklearn.dummy import DummyRegressor
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV, cross_val_score, train_test_split
-=======
-from sklearn.dummy import DummyRegressor
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.linear_model import LinearRegression, Ridge
-from sklearn.model_selection import GridSearchCV, train_test_split
->>>>>>> origin/main
 from sklearn.pipeline import Pipeline
 from sklearn.svm import SVR
 
 from src.config import (
     CV_FOLDS,
+    FIGURES_PATH,
     MODEL_PATH,
-<<<<<<< HEAD
-=======
     PROJECT_ROOT,
->>>>>>> origin/main
     RANDOM_STATE,
     RESULTS_PATH,
     TARGET_COLUMN,
     TEST_SIZE,
 )
+from src.data_cleaning import clean_student_data
 from src.data_loader import load_data
-<<<<<<< HEAD
 from src.preprocessing import build_preprocessor
 
 
-def calculate_metrics(y_true, y_pred):
-    """Calculate regression evaluation metrics."""
+RIDGE_ALPHAS = [0.01, 0.1, 1, 10, 100, 1000]
+
+
+def calculate_metrics(y_true, y_pred) -> dict[str, float]:
+    """Tính bộ chỉ số hồi quy dùng chung của dự án."""
     return {
-        "MAE": mean_absolute_error(y_true, y_pred),
-        "RMSE": mean_squared_error(y_true, y_pred) ** 0.5,
-        "R2": r2_score(y_true, y_pred),
+        "MAE": float(mean_absolute_error(y_true, y_pred)),
+        "RMSE": float(mean_squared_error(y_true, y_pred) ** 0.5),
+        "R2": float(r2_score(y_true, y_pred)),
     }
 
 
-def train_models():
-    """Train, compare, tune, evaluate, and save models."""
+def _build_pipeline(model) -> Pipeline:
+    """Đặt toàn bộ tiền xử lý bên trong pipeline để tránh rò rỉ dữ liệu."""
+    return Pipeline(
+        [
+            ("preprocessor", build_preprocessor()),
+            ("model", model),
+        ]
+    )
 
-    # 1. Load data
-    data = load_data()
-=======
-from src.data_cleaning import clean_student_data
-from src.preprocessing import build_preprocessor
+
+def _save_ridge_cv_results(search: GridSearchCV) -> pd.DataFrame:
+    """Lưu bảng CV Ridge với MAE dương, độ lệch chuẩn và thứ hạng."""
+    cv_results = pd.DataFrame(search.cv_results_)
+    table = cv_results[
+        [
+            "param_model__alpha",
+            "mean_test_score",
+            "std_test_score",
+            "rank_test_score",
+        ]
+    ].copy()
+    table["mean_CV_MAE"] = -table.pop("mean_test_score")
+    table["std_CV_MAE"] = table.pop("std_test_score")
+    table = table.rename(
+        columns={
+            "param_model__alpha": "alpha",
+            "rank_test_score": "rank",
+        }
+    ).sort_values("rank")
+    table.to_csv(RESULTS_PATH / "ridge_cv_results.csv", index=False)
+    return table
 
 
-def train_models():
-    """Train regression models, compare metrics, and save the best pipeline."""
+def _save_ridge_coefficients(tuned_pipeline: Pipeline) -> pd.DataFrame:
+    """Xuất hệ số Ridge và biểu đồ các hệ số có độ lớn cao nhất."""
+    preprocessor = tuned_pipeline.named_steps["preprocessor"]
+    ridge_model = tuned_pipeline.named_steps["model"]
+    feature_names = preprocessor.get_feature_names_out()
+
+    coefficient_df = pd.DataFrame(
+        {
+            "feature": feature_names,
+            "coefficient": ridge_model.coef_,
+        }
+    )
+    coefficient_df["absolute_coefficient"] = coefficient_df[
+        "coefficient"
+    ].abs()
+    coefficient_df = coefficient_df.sort_values(
+        "absolute_coefficient", ascending=False
+    ).reset_index(drop=True)
+    coefficient_df.to_csv(
+        RESULTS_PATH / "ridge_coefficients.csv", index=False
+    )
+
+    plot_df = coefficient_df.head(20).sort_values("coefficient")
+    colors = [
+        "#1F77B4" if value >= 0 else "#D62728"
+        for value in plot_df["coefficient"]
+    ]
+    fig, ax = plt.subplots(figsize=(11, 7))
+    ax.barh(plot_df["feature"], plot_df["coefficient"], color=colors)
+    ax.axvline(0, color="#444444", linewidth=0.8)
+    ax.set_title("Các hệ số Ridge có độ lớn cao nhất")
+    ax.set_xlabel("Hệ số Ridge")
+    ax.set_ylabel("Đặc trưng sau tiền xử lý")
+    ax.grid(axis="x", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(
+        FIGURES_PATH / "09_ridge_coefficients.png",
+        dpi=300,
+        bbox_inches="tight",
+    )
+    plt.close(fig)
+    return coefficient_df
+
+
+def train_models() -> pd.DataFrame:
+    """Huấn luyện, đánh giá và lưu pipeline được chọn bằng CV MAE."""
     data, cleaning_summary = clean_student_data(load_data())
->>>>>>> origin/main
-
     X = data.drop(columns=[TARGET_COLUMN])
     y = data[TARGET_COLUMN]
 
-<<<<<<< HEAD
-    # 2. Split training and testing data
-=======
->>>>>>> origin/main
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
@@ -80,10 +134,6 @@ def train_models():
         random_state=RANDOM_STATE,
     )
 
-<<<<<<< HEAD
-    # 3. Define models
-=======
->>>>>>> origin/main
     models = {
         "DummyRegressor": DummyRegressor(strategy="mean"),
         "LinearRegression": LinearRegression(),
@@ -99,32 +149,18 @@ def train_models():
         "SVR": SVR(),
     }
 
-<<<<<<< HEAD
     RESULTS_PATH.mkdir(parents=True, exist_ok=True)
+    FIGURES_PATH.mkdir(parents=True, exist_ok=True)
     MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    results = []
-    best_name = None
+    results: list[dict[str, float | str]] = []
+    best_name = ""
     best_pipeline = None
     best_cv_mae = float("inf")
-
-    # 4. Train and compare models using cross-validation
-    for name, model in models.items():
-
-=======
-    results = []
-    best_name = None
-    best_pipeline = None
-    best_mae = float("inf")
+    best_test_metrics: dict[str, float] = {}
 
     for name, model in models.items():
->>>>>>> origin/main
-        pipeline = Pipeline([
-            ("preprocessor", build_preprocessor()),
-            ("model", model),
-        ])
-
-<<<<<<< HEAD
+        pipeline = _build_pipeline(model)
         cv_scores = cross_val_score(
             pipeline,
             X_train,
@@ -133,260 +169,82 @@ def train_models():
             cv=CV_FOLDS,
             n_jobs=-1,
         )
-
-        cv_mae = -cv_scores.mean()
+        cv_mae = float(-cv_scores.mean())
 
         pipeline.fit(X_train, y_train)
-        predictions = pipeline.predict(X_test)
-
-        metrics = calculate_metrics(y_test, predictions)
-
-        results.append({
-            "model": name,
-            "CV_MAE": cv_mae,
-            **metrics,
-        })
+        metrics = calculate_metrics(y_test, pipeline.predict(X_test))
+        results.append({"model": name, "CV_MAE": cv_mae, **metrics})
 
         if cv_mae < best_cv_mae:
+            best_name = name
+            best_pipeline = pipeline
             best_cv_mae = cv_mae
-            best_name = name
-            best_pipeline = pipeline
+            best_test_metrics = metrics
 
-    # 5. Tune Ridge using GridSearchCV
-=======
-        pipeline.fit(X_train, y_train)
-        predictions = pipeline.predict(X_test)
-
-        from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-        mae = mean_absolute_error(y_test, predictions)
-        rmse = mean_squared_error(y_test, predictions) ** 0.5
-        r2 = r2_score(y_test, predictions)
-
-        results.append({
-            "model": name,
-            "MAE": mae,
-            "RMSE": rmse,
-            "R2": r2,
-        })
-
-        if mae < best_mae:
-            best_mae = mae
-            best_name = name
-            best_pipeline = pipeline
-
-    # Tune Ridge using cross-validation on the training set only.
->>>>>>> origin/main
-    ridge_pipeline = Pipeline([
-        ("preprocessor", build_preprocessor()),
-        ("model", Ridge()),
-    ])
-
-    search = GridSearchCV(
-        ridge_pipeline,
-<<<<<<< HEAD
-        param_grid={
-            "model__alpha": [0.01, 0.1, 1, 10, 100, 1000]
-        },
-=======
-        param_grid={"model__alpha": [0.01, 0.1, 1, 10, 100, 1000]},
->>>>>>> origin/main
+    ridge_search = GridSearchCV(
+        _build_pipeline(Ridge()),
+        param_grid={"model__alpha": RIDGE_ALPHAS},
         scoring="neg_mean_absolute_error",
         cv=CV_FOLDS,
         n_jobs=-1,
+        refit=True,
     )
-<<<<<<< HEAD
-
-    search.fit(X_train, y_train)
-
-    # 6. Save Ridge cross-validation results
-    cv_results = pd.DataFrame(search.cv_results_)
-
-    cv_results = cv_results[
-        [
-            "param_model__alpha",
-            "mean_test_score",
-            "std_test_score",
-            "rank_test_score",
-        ]
-    ].copy()
-
-    cv_results["mean_CV_MAE"] = -cv_results["mean_test_score"]
-    cv_results["std_CV_MAE"] = cv_results["std_test_score"]
-
-    cv_results = cv_results[
-        [
-            "param_model__alpha",
-            "mean_CV_MAE",
-            "std_CV_MAE",
-            "rank_test_score",
-        ]
-    ].rename(columns={
-        "param_model__alpha": "alpha",
-        "rank_test_score": "rank",
-    })
-
-    cv_results.to_csv(
-        RESULTS_PATH / "ridge_cv_results.csv",
-        index=False,
+    ridge_search.fit(X_train, y_train)
+    tuned_pipeline = ridge_search.best_estimator_
+    tuned_cv_mae = float(-ridge_search.best_score_)
+    tuned_metrics = calculate_metrics(
+        y_test, tuned_pipeline.predict(X_test)
+    )
+    results.append(
+        {
+            "model": "Ridge_Tuned",
+            "CV_MAE": tuned_cv_mae,
+            **tuned_metrics,
+        }
     )
 
-    # 7. Get the best tuned Ridge model
-    tuned_pipeline = search.best_estimator_
-
-    tuned_predictions = tuned_pipeline.predict(X_test)
-    tuned_metrics = calculate_metrics(y_test, tuned_predictions)
-
-    results.append({
-        "model": "Ridge_Tuned",
-        "CV_MAE": -search.best_score_,
-        **tuned_metrics,
-    })
-
-    if -search.best_score_ < best_cv_mae:
+    if tuned_cv_mae < best_cv_mae:
         best_name = "Ridge_Tuned"
         best_pipeline = tuned_pipeline
-        best_cv_mae = -search.best_score_
+        best_cv_mae = tuned_cv_mae
+        best_test_metrics = tuned_metrics
 
-    # 8. Export Ridge coefficients
-    preprocessor = tuned_pipeline.named_steps["preprocessor"]
-    ridge_model = tuned_pipeline.named_steps["model"]
+    _save_ridge_cv_results(ridge_search)
+    _save_ridge_coefficients(tuned_pipeline)
 
-    feature_names = preprocessor.get_feature_names_out()
-    coefficients = ridge_model.coef_
+    results_df = pd.DataFrame(results).sort_values("CV_MAE")
+    results_df.to_csv(RESULTS_PATH / "model_comparison.csv", index=False)
 
-    coefficient_df = pd.DataFrame({
-        "feature": feature_names,
-        "coefficient": coefficients,
-    })
-
-    coefficient_df["absolute_coefficient"] = (
-        coefficient_df["coefficient"].abs()
-    )
-
-    coefficient_df = coefficient_df.sort_values(
-        "absolute_coefficient",
-        ascending=False,
-    )
-
-    coefficient_df.to_csv(
-        RESULTS_PATH / "ridge_coefficients.csv",
-        index=False,
-    )
-
-    # 9. Evaluate the selected model on the test set
-    best_predictions = best_pipeline.predict(X_test)
-    best_metrics = calculate_metrics(y_test, best_predictions)
-
-    # 10. Save model comparison
-    results_df = pd.DataFrame(results).sort_values(
-        "CV_MAE",
-        ascending=True,
-    )
-
-    results_df.to_csv(
-        RESULTS_PATH / "model_comparison.csv",
-        index=False,
-    )
-
-    # 11. Save the best model
+    if best_pipeline is None:
+        raise RuntimeError("Không chọn được pipeline tốt nhất.")
     joblib.dump(best_pipeline, MODEL_PATH)
 
-    # 12. Save training summary
     summary = {
         "best_model": best_name,
-        "best_cv_MAE": float(best_cv_mae),
-        "test_MAE": float(best_metrics["MAE"]),
-        "test_RMSE": float(best_metrics["RMSE"]),
-        "test_R2": float(best_metrics["R2"]),
+        "best_cv_MAE": best_cv_mae,
+        "test_MAE": best_test_metrics["MAE"],
+        "test_RMSE": best_test_metrics["RMSE"],
+        "test_R2": best_test_metrics["R2"],
         "train_rows": len(X_train),
         "test_rows": len(X_test),
         "best_ridge_alpha": float(
-            search.best_params_["model__alpha"]
+            ridge_search.best_params_["model__alpha"]
         ),
-        "best_ridge_cv_MAE": float(-search.best_score_),
+        "best_ridge_cv_MAE": tuned_cv_mae,
+        "data_cleaning": cleaning_summary.to_dict(),
     }
-
     with open(
-        RESULTS_PATH / "training_summary.json",
-        "w",
-        encoding="utf-8",
+        RESULTS_PATH / "training_summary.json", "w", encoding="utf-8"
     ) as file:
         json.dump(summary, file, indent=2, ensure_ascii=False)
 
-    # 13. Display results
-    print("\n=== MODEL COMPARISON ===")
     print(results_df.to_string(index=False))
-
-    print("\n=== RIDGE TUNING ===")
-    print(f"Best alpha: {search.best_params_['model__alpha']}")
-    print(f"Best CV MAE: {-search.best_score_:.4f}")
-
-    print("\n=== BEST MODEL ===")
-    print(f"Model: {best_name}")
-    print(f"Test MAE: {best_metrics['MAE']:.4f}")
-    print(f"Test RMSE: {best_metrics['RMSE']:.4f}")
-    print(f"Test R2: {best_metrics['R2']:.4f}")
-
-    print(f"\nSaved model to: {MODEL_PATH}")
-    print(f"Saved results to: {RESULTS_PATH}")
-=======
-    search.fit(X_train, y_train)
-
-    tuned_pipeline = search.best_estimator_
-    tuned_predictions = tuned_pipeline.predict(X_test)
-
-    from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
-
-    tuned_mae = mean_absolute_error(y_test, tuned_predictions)
-    tuned_rmse = mean_squared_error(y_test, tuned_predictions) ** 0.5
-    tuned_r2 = r2_score(y_test, tuned_predictions)
-
-    results.append({
-        "model": "Ridge_Tuned",
-        "MAE": tuned_mae,
-        "RMSE": tuned_rmse,
-        "R2": tuned_r2,
-        "best_alpha": search.best_params_["model__alpha"],
-        "best_cv_MAE": -search.best_score_,
-    })
-
-    if tuned_mae < best_mae:
-        best_name = "Ridge_Tuned"
-        best_pipeline = tuned_pipeline
-
-    RESULTS_PATH.mkdir(parents=True, exist_ok=True)
-    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    results_df = pd.DataFrame(results).sort_values("MAE")
-    results_df.to_csv(RESULTS_PATH / "model_comparison.csv", index=False)
-
-    joblib.dump(best_pipeline, MODEL_PATH)
-
-    summary = {
-        "best_model": best_name,
-        "test_MAE": float(best_mae if best_name != "Ridge_Tuned" else tuned_mae),
-        "test_rows": len(X_test),
-        "train_rows": len(X_train),
-        "best_ridge_alpha": search.best_params_["model__alpha"],
-        "best_ridge_cv_MAE": float(-search.best_score_),
-        "data_cleaning": cleaning_summary.to_dict(),
-    }
-    with open(RESULTS_PATH / "training_summary.json", "w", encoding="utf-8") as file:
-        json.dump(summary, file, indent=2)
-
-    print(results_df.to_string(index=False))
-    print(f"\nBest model: {best_name}")
+    print(f"\nBest model by CV MAE: {best_name}")
+    print(f"Best Ridge alpha: {ridge_search.best_params_['model__alpha']}")
     print(f"Saved model to: {MODEL_PATH.relative_to(PROJECT_ROOT)}")
     print(f"Saved results to: {RESULTS_PATH.relative_to(PROJECT_ROOT)}")
->>>>>>> origin/main
-
     return results_df
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
     train_models()
-=======
-    train_models()
->>>>>>> origin/main

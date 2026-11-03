@@ -5,7 +5,7 @@
       "max": 44.0,
       "recommended_min": 0.0,
       "recommended_max": 44.0,
-      "unit": "giờ"
+      "unit": "giờ/tuần"
     },
     "Attendance": {
       "min": 60.0,
@@ -19,28 +19,28 @@
       "max": 10.0,
       "recommended_min": 0.0,
       "recommended_max": 10.0,
-      "unit": "giờ"
+      "unit": "giờ/ngày"
     },
     "Previous_Scores": {
       "min": 50.0,
       "max": 100.0,
       "recommended_min": 0.0,
       "recommended_max": 100.0,
-      "unit": "buổi/lần"
+      "unit": "điểm"
     },
     "Tutoring_Sessions": {
       "min": 0.0,
       "max": 8.0,
       "recommended_min": 0.0,
       "recommended_max": 8.0,
-      "unit": "buổi/lần"
+      "unit": "buổi"
     },
     "Physical_Activity": {
       "min": 0.0,
       "max": 6.0,
       "recommended_min": 0.0,
       "recommended_max": 6.0,
-      "unit": "buổi/lần"
+      "unit": "giờ/tuần"
     }
   },
   "categorical_allowed": {

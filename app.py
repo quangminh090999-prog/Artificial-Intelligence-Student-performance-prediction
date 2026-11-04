@@ -322,29 +322,61 @@ def render_batch_prediction() -> None:
 
 
 def render_model_results() -> None:
-    page_header("Kết quả và đánh giá mô hình", "Các mô hình được đánh giá trên cùng tập test; MAE và RMSE càng thấp càng tốt.")
-    metrics = load_svr_metrics()
-    columns = st.columns(3)
-    columns[0].metric("SVR · MAE", f"{metrics['mae']:.4f}")
-    columns[1].metric("SVR · RMSE", f"{metrics['rmse']:.4f}")
-    columns[2].metric("SVR · R²", f"{metrics['r2']:.4f}")
+    page_header(
+        "Kết quả và đánh giá mô hình",
+        "Tất cả mô hình được đánh giá trên cùng tập test; MAE và RMSE càng thấp, R² càng cao càng tốt.",
+    )
     selection_path = RESULTS_PATH / "final_model_selection.csv"
     if selection_path.exists():
         try:
             selection = pd.read_csv(selection_path)
-            st.subheader("Bảng xếp hạng mô hình")
-            st.dataframe(selection[["rank", "model", "MAE", "RMSE", "R2", "selected"]], width="stretch", hide_index=True)
+            required_columns = {"rank", "model", "MAE", "RMSE", "R2", "selected"}
+            missing_columns = required_columns.difference(selection.columns)
+            if missing_columns:
+                raise KeyError(f"Thiếu cột: {', '.join(sorted(missing_columns))}")
+
+            selection = selection.sort_values("rank").copy()
+            selection["Trạng thái"] = selection["selected"].map(
+                {True: "Được chọn triển khai", False: "Mô hình so sánh"}
+            )
+            selected_row = selection.loc[selection["selected"]].iloc[0]
+            columns = st.columns(3)
+            columns[0].metric("Mô hình tốt nhất · MAE", f"{selected_row['MAE']:.4f}")
+            columns[1].metric("Mô hình tốt nhất · RMSE", f"{selected_row['RMSE']:.4f}")
+            columns[2].metric("Mô hình tốt nhất · R²", f"{selected_row['R2']:.4f}")
+
+            display_table = selection.rename(
+                columns={
+                    "rank": "Xếp hạng",
+                    "model": "Mô hình",
+                }
+            )[["Xếp hạng", "Mô hình", "MAE", "RMSE", "R2", "Trạng thái"]]
+            display_table[["MAE", "RMSE", "R2"]] = display_table[["MAE", "RMSE", "R2"]].round(4)
+
+            table_tab, error_tab, r2_tab = st.tabs(
+                ["Bảng đầy đủ", "So sánh MAE và RMSE", "So sánh R²"]
+            )
+            with table_tab:
+                st.subheader(f"Bảng xếp hạng đầy đủ ({len(display_table)} mô hình)")
+                st.dataframe(display_table, width="stretch", hide_index=True)
+            with error_tab:
+                st.caption("Cột càng thấp thì sai số dự đoán càng nhỏ.")
+                error_chart = display_table.set_index("Mô hình")[["MAE", "RMSE"]]
+                st.bar_chart(error_chart, horizontal=True, width="stretch")
+            with r2_tab:
+                st.caption("Cột càng cao thì mô hình giải thích biến thiên điểm thi càng tốt.")
+                r2_chart = display_table.set_index("Mô hình")[["R2"]]
+                st.bar_chart(r2_chart, horizontal=True, width="stretch")
         except (KeyError, pd.errors.ParserError, UnicodeDecodeError) as exc:
             st.warning("Không thể đọc bảng lựa chọn mô hình.")
             st.caption(str(exc))
-    comparison_path = RESULTS_PATH / "model_comparison.csv"
-    if comparison_path.exists():
-        try:
-            with st.expander("Xem kết quả các mô hình cơ sở"):
-                st.dataframe(pd.read_csv(comparison_path), width="stretch", hide_index=True)
-        except (pd.errors.ParserError, UnicodeDecodeError) as exc:
-            st.warning("Không thể đọc bảng so sánh mô hình cơ sở.")
-            st.caption(str(exc))
+    else:
+        metrics = load_svr_metrics()
+        columns = st.columns(3)
+        columns[0].metric("SVR · MAE", f"{metrics['mae']:.4f}")
+        columns[1].metric("SVR · RMSE", f"{metrics['rmse']:.4f}")
+        columns[2].metric("SVR · R²", f"{metrics['r2']:.4f}")
+        st.warning("Chưa tìm thấy bảng so sánh đầy đủ các mô hình.")
     st.success("SVR Tuned được chọn triển khai vì đạt Test MAE thấp nhất và đã được kiểm thử cho dự đoán đơn lẫn CSV.")
     st.caption("Các chỉ số phản ánh khả năng dự đoán trên dữ liệu hiện tại, không chứng minh quan hệ nhân quả.")
 

@@ -227,6 +227,7 @@ data/processed/*
 models/*.joblib
 models/*.pkl
 !models/svr_pipeline.joblib
+!models/student_score_pipeline.joblib
 reports/figures/*.png
 reports/results/*.csv
 !reports/figures/08_svr_permutation_importance.png

@@ -147,8 +147,12 @@ def _save_diagnostic_figures(
     axis.figure.savefig(FIGURES_PATH / "12_advanced_overfitting_gap.png", dpi=180)
     plt.close(axis.figure)
 
-    comparison = all_models.sort_values("MAE").head(10).copy()
-    fig, axes = plt.subplots(1, 3, figsize=(16, 5))
+    _save_model_comparison(all_models)
+
+
+def _save_model_comparison(all_models: pd.DataFrame) -> None:
+    comparison = all_models.sort_values("MAE", kind="stable")
+    fig, axes = plt.subplots(1, 3, figsize=(16, max(5, 0.43 * len(comparison))))
     colors = ["#176b87" if bool(value) else "#9fb3c8" for value in comparison["selected"]]
     for axis, metric in zip(axes, ["MAE", "RMSE", "R2"]):
         axis.barh(comparison["model"], comparison[metric], color=colors)
@@ -172,6 +176,12 @@ def choose_final_model(advanced_metrics: pd.DataFrame) -> pd.DataFrame:
             frames.append(existing[required])
 
     frames.append(advanced_metrics[["model", "MAE", "RMSE", "R2"]])
+    knn_path = RESULTS_PATH / "knn_metrics.csv"
+    if knn_path.exists():
+        knn_metrics = pd.read_csv(knn_path).rename(
+            columns={"test_mae": "MAE", "test_rmse": "RMSE", "test_r2": "R2"}
+        )
+        frames.append(knn_metrics[["model", "MAE", "RMSE", "R2"]])
     combined = (
         pd.concat(frames, ignore_index=True)
         .drop_duplicates(subset="model", keep="last")

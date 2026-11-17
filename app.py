@@ -32,7 +32,7 @@ st.markdown(
     .brand-mark {display:grid;place-items:center;width:42px;height:42px;color:#fff;font-size:1.05rem;font-weight:800;border-radius:13px;background:linear-gradient(135deg,var(--navy),var(--blue));box-shadow:0 8px 18px rgba(18,52,91,.18)}
     .brand-name {color:var(--navy);font-size:1.2rem;font-weight:800;line-height:1.05}
     .brand-subtitle {color:var(--muted);font-size:.76rem;margin-top:.18rem}
-    .hero {position:relative;overflow:hidden;padding:3.2rem 3.3rem;border-radius:28px;color:#fff;background:radial-gradient(circle at 86% 22%,rgba(79,209,197,.35),transparent 18rem),linear-gradient(120deg,#11345c 0%,#176b87 72%,#168897 100%);box-shadow:0 20px 48px rgba(18,52,91,.2)}
+    .hero {position:relative;margin-bottom:1.25rem;overflow:hidden;padding:3.2rem 3.3rem;border-radius:28px;color:#fff;background:radial-gradient(circle at 86% 22%,rgba(79,209,197,.35),transparent 18rem),linear-gradient(120deg,#11345c 0%,#176b87 72%,#168897 100%);box-shadow:0 20px 48px rgba(18,52,91,.2)}
     .hero:after {content:"";position:absolute;right:-85px;bottom:-110px;width:320px;height:320px;border:1px solid rgba(255,255,255,.18);border-radius:50%;box-shadow:0 0 0 42px rgba(255,255,255,.05),0 0 0 88px rgba(255,255,255,.035)}
     .eyebrow {display:inline-flex;padding:.42rem .72rem;color:#dffbf7;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(255,255,255,.08)}
     .hero h1 {position:relative;z-index:1;max-width:780px;margin:1rem 0 .75rem;font-size:clamp(2.15rem,4vw,3.55rem);line-height:1.08;letter-spacing:-.035em}
@@ -165,7 +165,7 @@ def render_home() -> None:
         <p>StudentAI sử dụng Support Vector Regression đã được tuning để ước lượng điểm thi từ thói quen học tập, mức độ chuyên cần và môi trường của sinh viên.</p>
         <div class="trust-row"><span class="trust-chip">✓ Pipeline chống rò rỉ dữ liệu</span><span class="trust-chip">✓ Kiểm định chéo 5 fold</span><span class="trust-chip">✓ Dự đoán đơn và CSV</span></div></div>
         """, unsafe_allow_html=True)
-    primary, secondary, _ = st.columns([1, 1.35, .4])
+    primary, secondary = st.columns(2, gap="small")
     with primary:
         st.button("Bắt đầu dự đoán  →", type="primary", width="stretch", on_click=navigate, args=("Dự đoán cá nhân",))
     with secondary:
